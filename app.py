@@ -1,4 +1,5 @@
 from transformers import AutoModelForCausalLM
+import torch
 
 # Load the model
 model_id = "./HunyuanImage-3"
@@ -13,10 +14,13 @@ kwargs = dict(
     moe_impl="eager",   # Use "flashinfer" if FlashInfer is installed
 )
 
-model = AutoModelForCausalLM.from_pretrained(model_id, **kwargs)
+# Load the model and explicitly move all its components to the GPU
+model = AutoModelForCausalLM.from_pretrained(model_id, **kwargs).to("cuda")
 model.load_tokenizer(model_id)
 
 # generate the image
 prompt = "A brown and white dog is running on the grass"
 image = model.generate_image(prompt=prompt, stream=True)
 image.save("image.png")
+
+print("Image saved successfully to image.png!")
